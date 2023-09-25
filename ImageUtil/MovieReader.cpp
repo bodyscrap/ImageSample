@@ -21,6 +21,11 @@ namespace ImageUtil {
 			isRunning = false;
 		}
 	}
+	cv::Mat* MovieReader::Retrieve() {
+		cap.retrieve(frame);
+		return new::cv::Mat(frame.clone());
+	}
+
 	void MovieReader::SetCallback(CAPTURE_CALLBACK_TYPE callback)
 	{
 		OnCapture = callback;
@@ -35,11 +40,9 @@ namespace ImageUtil {
 			if (ret == false) {
 				continue;
 			}
-			ret = cap.retrieve(frame);
 			if (ret == true) {
 				if (OnCapture != nullptr) {
-					cv::Mat* pCopy = new cv::Mat(frame.clone());
-					OnCapture(pCopy);
+					OnCapture(this);
 				}
 			}
 			std::this_thread::sleep_for(std::chrono::microseconds(10));

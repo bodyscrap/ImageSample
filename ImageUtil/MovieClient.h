@@ -29,7 +29,7 @@ namespace ImageUtil {
 				}
 			}
 		}
-		delegate void OnCaptureDelegate(cv::Mat *pMat);
+		delegate void OnCaptureDelegate(IMovieReader *pReader);
 	public:
 		MovieClient(String^ path);
 		!MovieClient();
@@ -39,7 +39,7 @@ namespace ImageUtil {
 		bool Start();
 		void Stop();
 	private:
-		void OnCaptureNative(cv::Mat *pMat);
+		void OnCaptureNative(IMovieReader *pReader);
 	private:
 		OnCaptureDelegate^ fp = nullptr;
 		GCHandle gchandle;

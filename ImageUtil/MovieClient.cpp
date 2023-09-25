@@ -35,9 +35,10 @@ namespace ImageUtil {
 		}
 		return reader->StopCapture();
 	}
-	void MovieClient::OnCaptureNative(cv::Mat *pMat) {
-		if (pMat != nullptr)
-		{
+	void MovieClient::OnCaptureNative(IMovieReader *pReader) {
+		if (pReader != nullptr)
+		{   
+			cv::Mat *pMat = pReader->Retrieve();
 			OnCapture(this, gcnew ImageData(pMat));
 		}
 	};

@@ -26,6 +26,7 @@ namespace ImageUtil {
 			cap.release();
 		}
 		bool StartCapture();
+		cv::Mat* Retrieve();
 		void StopCapture();
 		void SetCallback(CAPTURE_CALLBACK_TYPE callback);
 		void RemoveCallback();
