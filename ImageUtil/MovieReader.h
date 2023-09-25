@@ -11,10 +11,10 @@ namespace ImageUtil {
 	private:
 		cv::VideoCapture cap;
 		cv::Mat frame;
-		std::thread th;
 		bool isRunning = false;
 		CAPTURE_CALLBACK_TYPE OnCapture = nullptr;
 		bool ret = false;
+		std::mutex capMutex;
 	public:
 		MovieReader(std::string path)
 		{

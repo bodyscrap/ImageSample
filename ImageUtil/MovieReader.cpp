@@ -3,22 +3,22 @@
 
 namespace ImageUtil {
 	bool MovieReader::StartCapture() {
+		std::lock_guard<std::mutex> lock(capMutex);
 		if(isRunning == true) {
 			return false;
 		}
 		else {
 			isRunning = true;
-			th = std::thread(&MovieReader::CaptureLoop, this);
+			std::thread capth = std::thread(&MovieReader::CaptureLoop, this);
+			capth.detach();
 			return true;
 		}
 
 	}
 	void MovieReader::StopCapture() {
-		if(isRunning == true) {
+		std::lock_guard<std::mutex> lock(capMutex);
+		if (isRunning == true) {
 			isRunning = false;
-			if (th.joinable() == true) {
-				th.join();
-			}
 		}
 	}
 	void MovieReader::SetCallback(CAPTURE_CALLBACK_TYPE callback)
@@ -30,18 +30,19 @@ namespace ImageUtil {
 		OnCapture = nullptr;
 	}
 	void MovieReader::CaptureLoop() {
-		while (isRunning) {
-			bool ret  = cap.grab();
+		while (isRunning == true) {
+			bool ret = cap.grab();
 			if (ret == false) {
-				break;
+				continue;
 			}
 			ret = cap.retrieve(frame);
-			if(ret == true) {
+			if (ret == true) {
 				if (OnCapture != nullptr) {
-					cv::Mat *pCopy = new cv::Mat(frame.clone());
+					cv::Mat* pCopy = new cv::Mat(frame.clone());
 					OnCapture(pCopy);
 				}
 			}
+			std::this_thread::sleep_for(std::chrono::microseconds(10));
 		}
 	}
 }
