@@ -2,44 +2,66 @@
 #include "MovieClient.h"
 #include "MovieReader.h"
 
+using namespace System::Diagnostics;
+
 namespace ImageUtil {
 	MovieClient::MovieClient(String^ path)
 	{
 		// unmanaged モジュールの初期化
-		reader = new MovieReader(msclr::interop::marshal_as<std::string>(path));
-		// unmanaged モジュールにコールバックを登録
-		fp = gcnew OnCaptureDelegate(this, &MovieClient::OnCaptureNative);
-		gchandle = GCHandle::Alloc(fp);
-		IntPtr ip = Marshal::GetFunctionPointerForDelegate(fp);
-		reader->SetCallback(static_cast<IMovieReader::CAPTURE_CALLBACK_TYPE>(ip.ToPointer()));
+		pReader = new MovieReader(msclr::interop::marshal_as<std::string>(path));
+		int width = pReader->GetWidth();
+		int height = pReader->GetHeight();
+		fps = pReader->GetFPS();
+		Frame = gcnew ImageData(width, height, 3);
 	}
 	MovieClient::!MovieClient() {
 		Stop();
-		if(reader != nullptr) {
-			delete (MovieReader*)reader;
-			reader = nullptr;
+		if(pReader != nullptr) {
+			delete (MovieReader*)pReader;
+			pReader = nullptr;
 		}
-		gchandle.Free();
 	}
 	bool MovieClient::Start() 
 	{
-		if(reader == nullptr) {
+		mut->WaitOne();
+		if(pReader == nullptr || capTask != nullptr) {
+			mut->ReleaseMutex();
 			return false;
 		}
-		return reader->StartCapture();
+		StopRequest = false;
+		capTask = System::Threading::Tasks::Task::Run(gcnew System::Action(this, &MovieClient::CaptrureLoop));
+		return true;
 	}
-	void MovieClient::Stop() 
+	bool MovieClient::Stop() 
 	{
-		if(reader == nullptr) {
-			return;
+		mut->WaitOne();
+		if(pReader == nullptr || capTask == nullptr) {
+			mut->ReleaseMutex();
+			return false;
 		}
-		return reader->StopCapture();
+		StopRequest = true;
+		capTask->Wait();
+		mut->ReleaseMutex();
+		return true;
 	}
-	void MovieClient::OnCaptureNative(IMovieReader *pReader) {
-		if (pReader != nullptr)
-		{   
-			cv::Mat *pMat = pReader->Retrieve();
-			OnCapture(this, gcnew ImageData(pMat));
+	void MovieClient::CaptrureLoop() {
+		std::chrono::system_clock::time_point  start, end;
+		const double interval = 1000.0 / fps;
+		while (StopRequest == false) {
+			start = std::chrono::system_clock::now();
+			if (pReader->Grab() == true) {
+				Frame->mutex->WaitOne();
+				bool ret = pReader->Retrieve(Frame->pMat);
+				Frame->mutex->ReleaseMutex();
+				if (ret == true) {
+					OnCapture(this, Frame);
+				}
+			}
+			end = std::chrono::system_clock::now();		
+			double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+			if(elapsed <= interval) {
+				System::Threading::Thread::Sleep((int)(interval - elapsed));
+			}
 		}
 	};
 }

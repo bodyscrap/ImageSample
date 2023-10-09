@@ -37,13 +37,16 @@ namespace ImageUtil {
 			this->!MovieClient();
 		}
 		bool Start();
-		void Stop();
+		bool Stop();
 	private:
-		void OnCaptureNative(IMovieReader *pReader);
+		void CaptrureLoop();
 	private:
-		OnCaptureDelegate^ fp = nullptr;
-		GCHandle gchandle;
-		IMovieReader* reader = nullptr;
+		IMovieReader* pReader = nullptr;
+		ImageData^ Frame = nullptr;
+		System::Threading::Tasks::Task^ capTask = nullptr;
+		System::Threading::Mutex^ mut = gcnew System::Threading::Mutex();
+		bool StopRequest = false;
+		double fps = 30.0;
 	};
 }
 

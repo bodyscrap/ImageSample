@@ -23,7 +23,7 @@ namespace ImageUtil {
 				default:
 					type = CV_8UC3;
 			}
-			pMat = new cv::Mat(width, height, type);
+			pMat = new cv::Mat(height, width, type);
 			if (pMat->empty() == false) {
 				bufSize = pMat->total() * pMat->elemSize();
 				stride = pMat->step1();
@@ -82,6 +82,7 @@ namespace ImageUtil {
 		BitmapSource^ CreateBitmapSoruce();
 	internal:
 		cv::Mat* pMat = nullptr;
+		System::Threading::Mutex^ mutex = gcnew System::Threading::Mutex();
 		int bufSize = 0;
 		int stride = 0;
 	};

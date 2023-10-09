@@ -21,6 +21,7 @@ namespace ImageSample
     /// </summary>
     public partial class MainWindow : Window
     {
+        private bool IsBusy = true;
         MovieClient? client = null;
         public MainWindow()
         {
@@ -28,9 +29,12 @@ namespace ImageSample
         }
         public void OnCapture(object? sender, ImageData img)
         {
+            if(IsBusy) return;
+            IsBusy = true;
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 image.Source = img.CreateBitmapSoruce();
+                IsBusy = false;
             }));
         }
 
@@ -41,6 +45,7 @@ namespace ImageSample
                 client.OnCapture -= OnCapture;
                 client.Stop();
                 client = null;
+                IsBusy = true;
             }
         }
         private void btnStart_Click(object sender, RoutedEventArgs e)
@@ -49,6 +54,7 @@ namespace ImageSample
             String path = textBox.Text;
             client = new MovieClient(path);
             client.OnCapture += OnCapture;
+            IsBusy = false;
             client.Start();
 
         }

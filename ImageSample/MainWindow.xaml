@@ -9,7 +9,7 @@
     <Grid>
         <Image x:Name="image" HorizontalAlignment="Left" Height="720" Margin="10,10,0,0" VerticalAlignment="Top" Width="1280"/>
         <Label x:Name="label" Content="URI:" HorizontalAlignment="Left" Margin="364,760,0,0" VerticalAlignment="Top" Width="52"/>
-        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="26" Margin="450,760,0,0" TextWrapping="Wrap" Text="C:/Users/svkcy/Videos\test.mp4" VerticalAlignment="Top" Width="344"/>
+        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="26" Margin="450,760,0,0" TextWrapping="Wrap" Text="rtsp://localhost:8554/" VerticalAlignment="Top" Width="344"/>
         <Button x:Name="btnStart" Content="Start" HorizontalAlignment="Left" Margin="840,760,0,0" VerticalAlignment="Top" Height="26" Width="79" Click="btnStart_Click"/>
         <Button x:Name="btnStop" Content="Stop" HorizontalAlignment="Left" Margin="940,760,0,0" VerticalAlignment="Top" Height="26" Width="79" Click="btnStop_Click"/>
     </Grid>

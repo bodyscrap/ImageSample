@@ -9,12 +9,15 @@ namespace ImageUtil {
 	/// <param name="path"></param>
 	/// <returns></returns>
 	BitmapSource^ ImageData::CreateBitmapSoruce() {
+		mutex->WaitOne();
 		if(pMat == nullptr)
 		{
+			mutex->ReleaseMutex();
 			throw gcnew System::ArgumentNullException("Mat is null");
 		}
 		if(pMat->data == nullptr)
 		{
+			mutex->ReleaseMutex();
 			throw gcnew System::ArgumentNullException("data of Mat is null");
 		}
 		PixelFormat format = (pMat->channels() == 3) ? PixelFormats::Bgr24 : PixelFormats::Gray8;
@@ -29,6 +32,7 @@ namespace ImageUtil {
 			bufSize,
 			stride
 		);
+		mutex->ReleaseMutex();
 		return ret;
 	}
 }

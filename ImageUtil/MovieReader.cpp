@@ -1,51 +1,34 @@
 #include "pch.h"
 #include "MovieReader.h"
 
+using namespace System::Diagnostics;
+
 namespace ImageUtil {
-	bool MovieReader::StartCapture() {
+	bool MovieReader::Grab() {
 		std::lock_guard<std::mutex> lock(capMutex);
-		if(isRunning == true) {
-			return false;
+		if(cap.isOpened() == true) {
+			return cap.grab();
 		}
 		else {
-			isRunning = true;
-			std::thread capth = std::thread(&MovieReader::CaptureLoop, this);
-			capth.detach();
-			return true;
+			return false;
 		}
 
 	}
-	void MovieReader::StopCapture() {
+	bool MovieReader::Retrieve(cv::Mat *pDst) {
 		std::lock_guard<std::mutex> lock(capMutex);
-		if (isRunning == true) {
-			isRunning = false;
+		if(cap.isOpened() == true) {
+			const bool ret = cap.retrieve(*pDst);
+			return ret;
 		}
-	}
-	cv::Mat* MovieReader::Retrieve() {
+		else {
+			return false;
+		}
 		cap.retrieve(frame);
 		return new::cv::Mat(frame.clone());
 	}
-
-	void MovieReader::SetCallback(CAPTURE_CALLBACK_TYPE callback)
-	{
-		OnCapture = callback;
-	}
-	void MovieReader::RemoveCallback()
-	{
-		OnCapture = nullptr;
-	}
-	void MovieReader::CaptureLoop() {
-		while (isRunning == true) {
-			bool ret = cap.grab();
-			if (ret == false) {
-				continue;
-			}
-			if (ret == true) {
-				if (OnCapture != nullptr) {
-					OnCapture(this);
-				}
-			}
-			std::this_thread::sleep_for(std::chrono::microseconds(10));
-		}
+	void MovieReader::Release() {
+		std::lock_guard<std::mutex> lock(capMutex);
+		cap.release();
+		frame.release();
 	}
 }

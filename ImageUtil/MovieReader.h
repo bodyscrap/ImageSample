@@ -11,26 +11,26 @@ namespace ImageUtil {
 	private:
 		cv::VideoCapture cap;
 		cv::Mat frame;
-		bool isRunning = false;
-		CAPTURE_CALLBACK_TYPE OnCapture = nullptr;
-		bool ret = false;
 		std::mutex capMutex;
 	public:
 		MovieReader(std::string path)
 		{
 			cap = cv::VideoCapture(path);
-			ret = cap.isOpened();
 		}
 		~MovieReader() {
-			StopCapture();
-			cap.release();
+			Release();
 		}
-		bool StartCapture();
-		cv::Mat* Retrieve();
-		void StopCapture();
-		void SetCallback(CAPTURE_CALLBACK_TYPE callback);
-		void RemoveCallback();
-	private:
-		void CaptureLoop();
+		int GetWidth() {
+			return (int)cap.get(cv::CAP_PROP_FRAME_WIDTH);
+		}
+		int GetHeight() {
+			return (int)cap.get(cv::CAP_PROP_FRAME_HEIGHT);
+		}
+		double GetFPS() {
+			return cap.get(cv::CAP_PROP_FPS);
+		}
+		bool Grab();
+		bool Retrieve(cv::Mat *pDst);
+		void Release();
 	};
 }
