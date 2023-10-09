@@ -7,7 +7,6 @@ namespace ImageUtil {
 	public class IMovieReader
 	{
 	public:
-		using CAPTURE_CALLBACK_TYPE = void(__stdcall*)(IMovieReader* pReader);
 		IMovieReader() {};
 		virtual ~IMovieReader() { };
 		virtual int GetWidth() = 0;

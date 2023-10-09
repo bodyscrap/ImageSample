@@ -44,23 +44,27 @@ namespace ImageUtil {
 		mut->ReleaseMutex();
 		return true;
 	}
+	ImageData^ MovieClient::GetFrame() 
+	{
+		Frame->mutex->WaitOne();
+		bool ret = pReader->Retrieve(Frame->pMat);
+		Frame->mutex->ReleaseMutex();
+		return ret ? Frame : nullptr;
+	}
 	void MovieClient::CaptrureLoop() {
 		std::chrono::system_clock::time_point  start, end;
 		const double interval = 1000.0 / fps;
 		while (StopRequest == false) {
 			start = std::chrono::system_clock::now();
 			if (pReader->Grab() == true) {
-				Frame->mutex->WaitOne();
-				bool ret = pReader->Retrieve(Frame->pMat);
-				Frame->mutex->ReleaseMutex();
-				if (ret == true) {
-					OnCapture(this, Frame);
-				}
+				OnCapture(this);
 			}
 			end = std::chrono::system_clock::now();		
 			double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 			if(elapsed <= interval) {
-				System::Threading::Thread::Sleep((int)(interval - elapsed));
+				int wait = (int)(interval - elapsed);
+				System::Diagnostics::Debug::WriteLine("wait(ms) =" + wait.ToString());
+				System::Threading::Thread::Sleep(wait);
 			}
 		}
 	};

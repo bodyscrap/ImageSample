@@ -10,26 +10,25 @@ using namespace System::Runtime::InteropServices;
 namespace ImageUtil {
 	public ref class MovieClient
 	{
-	private:
-		System::EventHandler<ImageData^>^ _OnCapture = nullptr;
 	public:
-		event System::EventHandler<ImageData^>^ OnCapture {
-			void add(System::EventHandler<ImageData^>^ handler)
+		delegate void OnCaptureDelegate(MovieClient^ hClient);
+		OnCaptureDelegate^ _OnCapture;
+		event OnCaptureDelegate^ OnCapture {
+			void add(OnCaptureDelegate^ handler)
 			{
-				_OnCapture = static_cast<System::EventHandler<ImageData^>^> (Delegate::Combine(_OnCapture, handler));
+				_OnCapture = static_cast<OnCaptureDelegate^> (Delegate::Combine(_OnCapture, handler));
 			}
-			void remove(System::EventHandler<ImageData^>^ handler)
+			void remove(OnCaptureDelegate^ handler)
 			{
-				_OnCapture = static_cast<System::EventHandler<ImageData^>^> (Delegate::Remove(_OnCapture, handler));
+				_OnCapture = static_cast<OnCaptureDelegate^> (Delegate::Remove(_OnCapture, handler));
 			}
-			void raise(Object^ sender, ImageData^ img)
+			void raise(MovieClient^ hClient)
 			{
 				if (_OnCapture != nullptr) {
-					_OnCapture->Invoke(sender, img);
+					_OnCapture->Invoke(hClient);
 				}
 			}
 		}
-		delegate void OnCaptureDelegate(IMovieReader *pReader);
 	public:
 		MovieClient(String^ path);
 		!MovieClient();
@@ -37,6 +36,7 @@ namespace ImageUtil {
 			this->!MovieClient();
 		}
 		bool Start();
+		ImageData^ GetFrame();
 		bool Stop();
 	private:
 		void CaptrureLoop();

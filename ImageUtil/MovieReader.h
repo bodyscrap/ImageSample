@@ -15,7 +15,7 @@ namespace ImageUtil {
 	public:
 		MovieReader(std::string path)
 		{
-			cap = cv::VideoCapture(path);
+			cap = cv::VideoCapture(path, cv::CAP_FFMPEG);
 		}
 		~MovieReader() {
 			Release();

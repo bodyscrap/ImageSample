@@ -27,13 +27,13 @@ namespace ImageSample
         {
             InitializeComponent();
         }
-        public void OnCapture(object? sender, ImageData img)
+        public void OnCapture(MovieClient hClient)
         {
             if(IsBusy) return;
             IsBusy = true;
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                image.Source = img.CreateBitmapSoruce();
+                image.Source = hClient.GetFrame().CreateBitmapSoruce();
                 IsBusy = false;
             }));
         }
